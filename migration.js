@@ -11,7 +11,13 @@ db.serialize(() => {
        'is_current_employee INTEGER DEFAULT 1);')
 
   // Create Timesheet table
-
+  db.run('CREATE TABLE IF NOT EXISTS Timesheet (' +
+           'id INTEGER PRIMARY KEY NOT NULL, ' +
+           'hours INTEGER NOT NULL, ' +
+           'rate INTEGER NOT NULL, ' +
+           'date INTEGER NOT NULL, ' +
+           'employee_id INTEGER NOT NULL, ' +
+           'FOREIGN KEY (employee_id) REFERENCES Employee(id));')
   // Create Menu table
 
   // Create Menu Item table
