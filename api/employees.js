@@ -5,15 +5,15 @@ const employeeRouter = express.Router()
 
 // Get all employees
 employeeRouter.get('/', (req, res, next) => {
-  db.all('SELECT * FROM Employee WHERE is_current_employee = 1;',
-    (error, employees) => {
-      if (error) {
-        next(error)
-      } else if (employees) {
-        res.status(200).json({ employees: employees })
-      } else {
-        res.sendStatus(404)
-      }
-    })
+  const sql = 'SELECT * FROM Employee WHERE is_current_employee = 1;'
+  db.all(sql, (error, employees) => {
+    if (error) {
+      next(error)
+    } else if (employees) {
+      res.status(200).json({ employees: employees })
+    } else {
+      res.sendStatus(404)
+    }
+  })
 })
 module.exports = employeeRouter
