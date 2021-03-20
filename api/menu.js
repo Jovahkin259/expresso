@@ -60,4 +60,9 @@ menuRouter.param('menuId', (req, res, next, menuId) => {
     }
   })
 })
+
+// Get a menu by ID
+menuRouter.get('/:menuId', (req, res, next) => {
+  res.status(200).json({ menu: req.menu })
+})
 module.exports = menuRouter
