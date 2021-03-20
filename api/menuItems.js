@@ -26,4 +26,30 @@ menuItemsRouter.get('/', (req, res, next) => {
     }
   })
 })
+
+// Create a new menu item
+menuItemsRouter.post('/', validateMenuItem, (req, res, next) => {
+  const sql = 'INSERT INTO MenuItem (name, description, inventory, price, menu_id) ' +
+                'VALUES ($name, $description, $inventory, $price, $menuId) '
+  const values = {
+    $name: req.body.menuItem.name,
+    $description: req.body.menuItem.description ? req.body.menuItem.description : '',
+    $inventory: req.body.menuItem.inventory,
+    $price: req.body.menuItem.price,
+    $menuId: req.params.menuId
+  }
+  db.run(sql, values, function (error) {
+    if (error) {
+      next(error)
+    } else {
+      db.get(`SELECT * FROM MenuItem WHERE id = ${this.lastID}`, (error, menuItem) => {
+        if (error) {
+          next(error)
+        } else {
+          res.status(201).json({ menuItem: menuItem })
+        }
+      })
+    }
+  })
+})
 module.exports = menuItemsRouter
