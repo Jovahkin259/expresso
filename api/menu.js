@@ -88,4 +88,23 @@ menuRouter.put('/:menuId', validateMenu, (req, res, next) => {
     }
   })
 })
+
+// Check for exisiting menu items
+const menuHasItems = (req, res, next) => {
+  db.get(`SELECT * FROM MenuItem WHERE id = ${req.params.menuId}`, (error, menuItem) => {
+    if (error) {
+      next(error)
+    } else if (menuItem) {
+      res.sendStatus(400)
+    } else {
+      next()
+    }
+  })
+}
+
+// Check for related menu items
+menuRouter.delete('/:menuId', menuHasItems, (req, res, next) => {
+
+})
+
 module.exports = menuRouter
