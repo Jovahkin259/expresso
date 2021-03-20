@@ -4,5 +4,5 @@ const employeeRouter = require('./employees')
 const menuRouter = require('./menu')
 
 apiRouter.use('/employees', employeeRouter)
-apiRouter.use('/menu', menuRouter)
+apiRouter.use('/menus', menuRouter)
 module.exports = apiRouter
