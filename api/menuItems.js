@@ -7,7 +7,7 @@ const menuItemsRouter = express.Router({ mergeParams: true })
 const validateMenuItem = (req, res, next) => {
   const menuItem = req.body.menuItem
   if (!menuItem.name || !menuItem.inventory || !menuItem.price || !req.params.menuId) {
-    res.sendStatus(400)
+    return res.sendStatus(400)
   } else {
     next()
   }
@@ -66,6 +66,32 @@ menuItemsRouter.param('menuItemId', (req, res, next, menuItemId) => {
     } else {
       req.menuItem = menuItem
       next()
+    }
+  })
+})
+
+// Update an existing menu item
+menuItemsRouter.put('/:menuItemId', validateMenuItem, (req, res, next) => {
+  const sql = 'UPDATE MenuItem SET name = $name, description = $description, inventory = $inventory, price = $price, menu_id = $menuId WHERE id = $menuItemId;'
+  const values = {
+    $name: req.body.menuItem.name,
+    $description: req.body.menuItem.description ? req.body.menuItem.description : '',
+    $inventory: req.body.menuItem.inventory,
+    $price: req.body.menuItem.price,
+    $menuId: req.params.menuId,
+    $menuItemId: req.params.menuItemId
+  }
+  db.run(sql, values, (error) => {
+    if (error) {
+      next(error)
+    } else {
+      db.get(`SELECT * FROM MenuItem WHERE id = ${req.params.menuItemId}`, (error, menuItem) => {
+        if (error) {
+          next(error)
+        } else {
+          res.status(200).json({ menuItem: menuItem })
+        }
+      })
     }
   })
 })
