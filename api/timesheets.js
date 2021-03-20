@@ -91,4 +91,16 @@ timesheetRouter.put('/:timesheetId', validateTimesheet, (req, res, next) => {
     }
   })
 })
+
+// Delete a timesheet
+timesheetRouter.delete('/:timesheetId', (req, res, next) => {
+  const sql = `DELETE FROM Timesheet WHERE id = ${req.params.timesheetId};`
+  db.run(sql, error => {
+    if (error) {
+      next(error)
+    } else {
+      res.sendStatus(204)
+    }
+  })
+})
 module.exports = timesheetRouter
