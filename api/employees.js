@@ -8,7 +8,7 @@ const validateEmployee = (req, res, next) => {
   const employee = req.body.employee
 
   if (!employee.name || !employee.position || !employee.wage) {
-    return res.sendStatus(404)
+    return res.sendStatus(400)
   } else {
     next()
   }
@@ -46,4 +46,31 @@ employeeRouter.get('/:employeeId', (req, res, next) => {
   res.status(200).json({ employee: req.employee })
 })
 
+// Create a new employee
+employeeRouter.post('/', validateEmployee, (req, res, next) => {
+  const sql = 'INSERT INTO Employee (name, position, wage) ' +
+              'VALUES ($name, $position, $wage)'
+  const values = {
+    $name: req.body.employee.name,
+    $position: req.body.employee.position,
+    $wage: req.body.employee.wage
+  }
+
+  db.run(sql, values, function (error) {
+    if (error) {
+      next(error)
+    } else {
+      db.get(`SELECT * FROM Employee WHERE id = ${this.lastID}`,
+        function (error, employee) {
+          if (error) {
+            next(error)
+          } else if (employee) {
+            res.status(201).json({ employee: employee })
+          } else {
+            res.sendStatus(400)
+          }
+        })
+    }
+  })
+})
 module.exports = employeeRouter
