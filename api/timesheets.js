@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3')
 const db = new sqlite3.Database(process.env.TEST_DATABASE || './database.sqlite')
 const timesheetRouter = express.Router({ mergeParams: true })
 
+// Search for a timesheet with the given id
 timesheetRouter.param('timesheetId', (req, res, next, timesheetId) => {
   db.get(`SELECT * FROM Timesheet WHERE id = ${timesheetId};`, (error, timesheet) => {
     if (error) {
@@ -16,6 +17,15 @@ timesheetRouter.param('timesheetId', (req, res, next, timesheetId) => {
   })
 })
 
+// Validate a new timesheet with the given id
+const validateTimesheet = (req, res, next) => {
+  const timesheet = req.body.timesheet
+  if (!timesheet.hours || !timesheet.rate || !timesheet.date || !req.params.employeeId) {
+    res.sendStatus(400)
+  } else {
+    next()
+  }
+}
 // Get all timesheets for a given employee
 timesheetRouter.get('/', (req, res, next) => {
   const sql = 'SELECT * FROM Timesheet WHERE Timesheet.employee_id = $employeeId;'
@@ -31,4 +41,28 @@ timesheetRouter.get('/', (req, res, next) => {
   })
 })
 
+// Create a new timesheet
+timesheetRouter.post('/', validateTimesheet, (req, res, next) => {
+  const sql = 'INSERT INTO Timesheet (hours, rate, date, employee_id) ' +
+                'VALUES ($hours, $rate, $date, $employeeId)'
+  const values = {
+    $hours: req.body.timesheet.hours,
+    $rate: req.body.timesheet.rate,
+    $date: req.body.timesheet.date,
+    $employeeId: req.params.employeeId
+  }
+  db.run(sql, values, function (error) {
+    if (error) {
+      next(error)
+    } else {
+      db.get(`SELECT * FROM Timesheet WHERE id = ${this.lastID}`, (error, timesheet) => {
+        if (error) {
+          next(error)
+        } else {
+          res.status(201).json({ timesheet: timesheet })
+        }
+      })
+    }
+  })
+})
 module.exports = timesheetRouter
