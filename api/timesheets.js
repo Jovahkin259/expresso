@@ -21,7 +21,7 @@ timesheetRouter.param('timesheetId', (req, res, next, timesheetId) => {
 const validateTimesheet = (req, res, next) => {
   const timesheet = req.body.timesheet
   if (!timesheet.hours || !timesheet.rate || !timesheet.date || !req.params.employeeId) {
-    res.sendStatus(400)
+    return res.sendStatus(400)
   } else {
     next()
   }
@@ -60,6 +60,32 @@ timesheetRouter.post('/', validateTimesheet, (req, res, next) => {
           next(error)
         } else {
           res.status(201).json({ timesheet: timesheet })
+        }
+      })
+    }
+  })
+})
+
+// Update a timesheet
+timesheetRouter.put('/:timesheetId', validateTimesheet, (req, res, next) => {
+  const sql = 'UPDATE Timesheet SET hours = $hours, rate = $rate, date = $date, employee_id = $employeeId WHERE id = $id;'
+  const values = {
+    $hours: req.body.timesheet.hours,
+    $rate: req.body.timesheet.rate,
+    $date: req.body.timesheet.date,
+    $employeeId: req.params.employeeId,
+    $id: req.params.timesheetId
+  }
+
+  db.run(sql, values, function (error) {
+    if (error) {
+      next(error)
+    } else {
+      db.get(`SELECT * FROM Timesheet WHERE id = ${req.params.timesheetId}`, (error, timesheet) => {
+        if (error) {
+          next(error)
+        } else {
+          res.status(200).json({ timesheet: timesheet })
         }
       })
     }
