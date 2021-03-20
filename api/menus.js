@@ -2,6 +2,7 @@ const express = require('express')
 const sqlite3 = require('sqlite3')
 const db = new sqlite3.Database(process.env.TEST_DATABASE || './database.sqlite')
 const menusRouter = express.Router()
+const menuItemsRouter = require('./menuItems')
 
 // Validate a new menu
 const validateMenu = (req, res, next) => {
@@ -112,4 +113,5 @@ menusRouter.delete('/:menuId', (req, res, next) => {
   })
 })
 
+menusRouter.use('/:menuId/menu-items', menuItemsRouter)
 module.exports = menusRouter
