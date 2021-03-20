@@ -1,7 +1,7 @@
 const express = require('express')
 const sqlite3 = require('sqlite3')
 const db = new sqlite3.Database(process.env.TEST_DATABASE || './database.sqlite')
-const menuRouter = express.Router()
+const menusRouter = express.Router()
 
 // Validate a new menu
 const validateMenu = (req, res, next) => {
@@ -12,7 +12,7 @@ const validateMenu = (req, res, next) => {
   }
 }
 // Return all menus
-menuRouter.get('/', (req, res, next) => {
+menusRouter.get('/', (req, res, next) => {
   db.all('SELECT * FROM Menu', (error, menus) => {
     if (error) {
       next(error)
@@ -25,7 +25,7 @@ menuRouter.get('/', (req, res, next) => {
 })
 
 // Create a new menu
-menuRouter.post('/', validateMenu, (req, res, next) => {
+menusRouter.post('/', validateMenu, (req, res, next) => {
   const sql = 'INSERT INTO Menu (title) ' +
                 'VALUES ($title);'
   const values = { $title: req.body.menu.title }
@@ -46,7 +46,7 @@ menuRouter.post('/', validateMenu, (req, res, next) => {
 })
 
 // Check menu ID parameters
-menuRouter.param('menuId', (req, res, next, menuId) => {
+menusRouter.param('menuId', (req, res, next, menuId) => {
   const sql = 'SELECT * FROM Menu WHERE id = $menuId;'
   const values = { $menuId: menuId }
   db.get(sql, values, (error, menu) => {
@@ -62,12 +62,12 @@ menuRouter.param('menuId', (req, res, next, menuId) => {
 })
 
 // Get a menu by ID
-menuRouter.get('/:menuId', (req, res, next) => {
+menusRouter.get('/:menuId', (req, res, next) => {
   res.status(200).json({ menu: req.menu })
 })
 
 // Update a menu by ID
-menuRouter.put('/:menuId', validateMenu, (req, res, next) => {
+menusRouter.put('/:menuId', validateMenu, (req, res, next) => {
   const sql = 'UPDATE Menu SET title = $title WHERE id = $id;'
   const values = {
     $title: req.body.menu.title,
@@ -90,7 +90,7 @@ menuRouter.put('/:menuId', validateMenu, (req, res, next) => {
 })
 
 // Check for related menu items
-menuRouter.delete('/:menuId', (req, res, next) => {
+menusRouter.delete('/:menuId', (req, res, next) => {
   const menuItemSql = 'SELECT * FROM MenuItem WHERE MenuItem.menu_id = $menuId;'
   const menuItemValues = { $menuId: req.params.menuId }
   db.get(menuItemSql, menuItemValues, (error, menuItem) => {
@@ -112,4 +112,4 @@ menuRouter.delete('/:menuId', (req, res, next) => {
   })
 })
 
-module.exports = menuRouter
+module.exports = menusRouter
