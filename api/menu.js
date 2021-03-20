@@ -45,4 +45,19 @@ menuRouter.post('/', validateMenu, (req, res, next) => {
   })
 })
 
+// Check menu ID parameters
+menuRouter.param('menuId', (req, res, next, menuId) => {
+  const sql = 'SELECT * FROM Menu WHERE id = $menuId;'
+  const values = { $menuId: menuId }
+  db.get(sql, values, (error, menu) => {
+    if (error) {
+      next(error)
+    } else if (!menu) {
+      return res.sendStatus(404)
+    } else {
+      req.menu = menu
+      next()
+    }
+  })
+})
 module.exports = menuRouter
