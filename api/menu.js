@@ -65,4 +65,27 @@ menuRouter.param('menuId', (req, res, next, menuId) => {
 menuRouter.get('/:menuId', (req, res, next) => {
   res.status(200).json({ menu: req.menu })
 })
+
+// Update a menu by ID
+menuRouter.put('/:menuId', validateMenu, (req, res, next) => {
+  const sql = 'UPDATE Menu SET title = $title WHERE id = $id;'
+  const values = {
+    $title: req.body.menu.title,
+    $id: req.params.menuId
+  }
+
+  db.run(sql, values, function (error) {
+    if (error) {
+      next(error)
+    } else {
+      db.get(`SELECT * FROM Menu WHERE id = ${req.params.menuId}`, (error, menu) => {
+        if (error) {
+          next(error)
+        } else {
+          res.status(200).json({ menu: menu })
+        }
+      })
+    }
+  })
+})
 module.exports = menuRouter
