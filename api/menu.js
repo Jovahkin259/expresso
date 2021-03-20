@@ -89,22 +89,27 @@ menuRouter.put('/:menuId', validateMenu, (req, res, next) => {
   })
 })
 
-// Check for exisiting menu items
-const menuHasItems = (req, res, next) => {
-  db.get(`SELECT * FROM MenuItem WHERE id = ${req.params.menuId}`, (error, menuItem) => {
+// Check for related menu items
+menuRouter.delete('/:menuId', (req, res, next) => {
+  const menuItemSql = 'SELECT * FROM MenuItem WHERE MenuItem.menu_id = $menuId;'
+  const menuItemValues = { $menuId: req.params.menuId }
+  db.get(menuItemSql, menuItemValues, (error, menuItem) => {
     if (error) {
       next(error)
     } else if (menuItem) {
       res.sendStatus(400)
     } else {
-      next()
+      const menuSql = 'DELETE FROM Menu WHERE Menu.id = $menuId;'
+      const menuValues = { $menuId: req.params.menuId }
+      db.run(menuSql, menuValues, error => {
+        if (error) {
+          next(error)
+        } else {
+          res.sendStatus(204)
+        }
+      })
     }
   })
-}
-
-// Check for related menu items
-menuRouter.delete('/:menuId', menuHasItems, (req, res, next) => {
-
 })
 
 module.exports = menuRouter
