@@ -48,12 +48,13 @@ employeeRouter.get('/:employeeId', (req, res, next) => {
 
 // Create a new employee
 employeeRouter.post('/', validateEmployee, (req, res, next) => {
-  const sql = 'INSERT INTO Employee (name, position, wage) ' +
-              'VALUES ($name, $position, $wage)'
+  const sql = 'INSERT INTO Employee (name, position, wage, is_current_employee) ' +
+              'VALUES ($name, $position, $wage, $employed)'
   const values = {
     $name: req.body.employee.name,
     $position: req.body.employee.position,
-    $wage: req.body.employee.wage
+    $wage: req.body.employee.wage,
+    $employed: req.body.employee.is_current_employee === 0 ? 0 : 1
   }
 
   db.run(sql, values, function (error) {
@@ -70,6 +71,34 @@ employeeRouter.post('/', validateEmployee, (req, res, next) => {
             res.sendStatus(400)
           }
         })
+    }
+  })
+})
+
+// Update an existing employee
+employeeRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
+  const sql = 'UPDATE Employee SET name = $name, position = $position, wage = $wage, is_current_employee = $employed WHERE id = $employeeId;'
+  const values = {
+    $name: req.body.employee.name,
+    $position: req.body.employee.position,
+    $wage: req.body.employee.wage,
+    $employed: req.body.employee.is_current_employee === 0 ? 0 : 1,
+    $employeeId: req.params.employeeId
+  }
+
+  db.run(sql, values, (error) => {
+    if (error) {
+      next(error)
+    } else {
+      db.get(`SELECT * FROM Employee WHERE id = ${req.params.employeeId}`, (error, employee) => {
+        if (error) {
+          next(error)
+        } else if (employee) {
+          res.status(200).json({ employee: employee })
+        } else {
+          res.sendStatus(400)
+        }
+      })
     }
   })
 })
