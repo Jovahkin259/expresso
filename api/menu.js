@@ -24,4 +24,25 @@ menuRouter.get('/', (req, res, next) => {
   })
 })
 
+// Create a new menu
+menuRouter.post('/', validateMenu, (req, res, next) => {
+  const sql = 'INSERT INTO Menu (title) ' +
+                'VALUES ($title);'
+  const values = { $title: req.body.menu.title }
+
+  db.run(sql, values, function (error) {
+    if (error) {
+      next(error)
+    } else {
+      db.get(`SELECT * FROM Menu WHERE id = ${this.lastID}`, (error, menu) => {
+        if (error) {
+          next(error)
+        } else {
+          res.status(201).json({ menu: menu })
+        }
+      })
+    }
+  })
+})
+
 module.exports = menuRouter
