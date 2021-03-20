@@ -18,9 +18,19 @@ db.serialize(() => {
             'date INTEGER NOT NULL, ' +
             'employee_id INTEGER NOT NULL, ' +
             'FOREIGN KEY (employee_id) REFERENCES Employee(id));')
+
   // Create Menu table
   db.run('CREATE TABLE IF NOT EXISTS Menu (' +
         'id INTEGER PRIMARY KEY NOT NULL, ' +
-        'title TEXT NOT NULL)')
+        'title TEXT NOT NULL);')
+
   // Create Menu Item table
+  db.run('CREATE TABLE IF NOT EXISTS MenuItem (' +
+         'id INTEGER PRIMARY KEY NOT NULL, ' +
+         'name TEXT NOT NULL, ' +
+         'description TEXT, ' +
+         'inventory INTEGER NOT NULL, ' +
+         'price INTEGER NOT NULL, ' +
+         'menu_id INTEGER NOT NULL, ' +
+         'FOREIGN KEY(menu_id) REFERENCES Menu (id));')
 })
