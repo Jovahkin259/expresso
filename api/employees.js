@@ -102,4 +102,26 @@ employeeRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
     }
   })
 })
+
+// Delete an existing employee
+employeeRouter.delete('/:employeeId', (req, res, next) => {
+  const sql = 'UPDATE Employee SET is_current_employee = 0 WHERE id = $employeeId'
+  const values = { $employeeId: req.params.employeeId }
+
+  db.run(sql, values, error => {
+    if (error) {
+      next(error)
+    } else {
+      db.get(`SELECT * FROM Employee WHERE id = ${req.params.employeeId}`, (error, employee) => {
+        if (error) {
+          next(error)
+        } else if (employee) {
+          res.status(200).json({ employee: employee })
+        } else {
+          res.sendStatus(404)
+        }
+      })
+    }
+  })
+})
 module.exports = employeeRouter
